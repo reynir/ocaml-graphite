@@ -39,3 +39,41 @@ let get url =
   | `Error msg -> Lwt.fail_with msg
   | `Ok raw ->
     Lwt.return (List.map Metric.of_raw raw)
+
+type seconds = int
+type time =
+  | Relative of seconds
+  | Epoch of seconds
+
+
+let string_of_time =
+  let string_of_relative s =
+    if s < 60 || s mod 60 <> 0
+    then Printf.sprintf "-%ds" s
+    else if s < 60*60 || s mod (60*60) <> 0
+    then Printf.sprintf "-%dmin" (s / 60)
+    else if s < 60*60*24 || s mod (60*60*24) <> 0
+    then Printf.sprintf "-%dh" (s / 60 / 60)
+    else Printf.sprintf "-%dd" (s / 60 / 60 / 24)
+        (* TODO: weeks, months, years *)
+  in function
+  | Relative s ->
+    string_of_relative s
+  | Epoch s -> string_of_int s
+
+(* Maybe use format=raw ? *)
+let mk_url host ?(from=Relative (5*60)) ?until targets =
+  let query =
+    [("format", ["json"]);
+     ("from", [string_of_time from])] @
+    (match until with
+     | None -> []
+     | Some until -> [("until", [string_of_time until])]) @
+    List.map (fun target -> ("target", [target])) targets in
+  Uri.make
+    ~scheme:"http"
+    ~host
+    ~port:8081
+    ~path:"/render/"
+    ~query
+    ()
