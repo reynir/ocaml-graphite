@@ -1,0 +1,6 @@
+name="graphite"
+description="Graphite query library"
+version="0.1"
+requires="yojson,cohttp.lwt,ppx_deriving_yojson.runtime,lwt.ppx"
+archive(byte)="graphite.cmo"
+archive(native)="graphite.cmx"
