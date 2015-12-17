@@ -1,1 +1,1 @@
-"graphite.ml": package(cohttp.lwt,ppx_deriving_yojson,lwt.ppx)
+"graphite.ml": package(cohttp.lwt,ppx_deriving.show,ppx_deriving_yojson,lwt.ppx)

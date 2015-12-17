@@ -1,4 +1,4 @@
-PKG lwt lwt.ppx yojson ppx_deriving_yojson cohttp
+PKG lwt lwt.ppx yojson ppx_deriving ppx_deriving_yojson cohttp
 
 S .
 B _build/

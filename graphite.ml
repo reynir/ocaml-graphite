@@ -13,12 +13,12 @@ module Metric = struct
   type datapoint = {
     timestamp : int;
     value : float option;
-  }
+  } [@@deriving show]
 
   type t = {
     target : string;
     datapoints : datapoint list;
-  }
+  } [@@deriving show]
 
   let datapoint_of_raw_datapoint (value, timestamp) =
     { value; timestamp }
