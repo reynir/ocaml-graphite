@@ -17,3 +17,6 @@ install: _build/graphite.cmo _build/graphite.cmx _build/graphite.cmxa
 
 uninstall:
 	ocamlfind remove graphite
+
+clean:
+	ocamlbuild -use-ocamlfind -clean
