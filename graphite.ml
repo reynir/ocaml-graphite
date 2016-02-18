@@ -62,7 +62,7 @@ let string_of_time =
   | Epoch s -> string_of_int s
 
 (* Maybe use format=raw ? *)
-let mk_url host ?(from=Relative (5*60)) ?until targets =
+let mk_url host ?(port=8081) ?(from=Relative (5*60)) ?until targets =
   let query =
     [("format", ["json"]);
      ("from", [string_of_time from])] @
@@ -73,7 +73,7 @@ let mk_url host ?(from=Relative (5*60)) ?until targets =
   Uri.make
     ~scheme:"http"
     ~host
-    ~port:8081
+    ~port
     ~path:"/render/"
     ~query
     ()
