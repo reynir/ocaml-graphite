@@ -77,3 +77,19 @@ let mk_url host ?(port=8081) ?(from=Relative (5*60)) ?until targets =
     ~path:"/render/"
     ~query
     ()
+
+let all_metrics host ?(port=8081) () =
+  let url =
+    Uri.make
+      ~scheme:"http"
+      ~host
+      ~port
+      ~path:"/metrics/index.json"
+      () in
+  let%lwt (resp, body) = Cohttp_lwt_unix.Client.get url in
+  let%lwt body = Cohttp_lwt_body.to_string body in
+  let json = Yojson.Safe.from_string body in
+  Lwt.return @@ match json with
+  | `List metrics ->
+    List.map (function (`String m) -> m | _ -> failwith "all_metrics: Not a json string") metrics
+  | _ -> failwith "all_metrics: Response was not a json list"
