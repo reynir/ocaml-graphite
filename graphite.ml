@@ -105,3 +105,53 @@ let all_metrics host ?(port=8081) () =
   | `List metrics ->
     List.map (function (`String m) -> m | _ -> failwith "all_metrics: Not a json string") metrics
   | _ -> failwith "all_metrics: Response was not a json list"
+
+type find_response = {
+  leaf : int;
+  (* context : Yojson.Safe.json; *)
+  text : string;
+  (* expandable : int; *)
+  id : string;
+  (* allowChildren : int; *)
+} [@@deriving yojson { strict = false }]
+type find_responses =
+  find_response list
+  [@@deriving yojson]
+
+let find host ?(port=8081) (* ?format ?wildcards ?from ?until ?jsonp *) query =
+  let url =
+    Uri.make
+      ~scheme:"http"
+      ~host
+      ~port
+      ~path:"/metrics/find"
+      ~query:[("query", [query])]
+      () in
+  let%lwt (resp, body) = Cohttp_lwt_unix.Client.get url in
+  let%lwt body = Cohttp_lwt_body.to_string body in
+  let json = Yojson.Safe.from_string body in
+  match find_responses_of_yojson json with
+  | `Error msg -> Lwt.fail_with msg
+  | `Ok r ->
+    Lwt.return r
+
+type expand_results = {
+  results : string list;
+} [@@deriving yojson]
+
+let expand host ?(port=8081) (* ?groupByExpr ?leavesOnly ?jsonp *) query =
+  let url =
+    Uri.make
+      ~scheme:"http"
+      ~host
+      ~port
+      ~path:"/metrics/expand"
+      ~query:[("query", [query])]
+      () in
+  let%lwt (resp, body) = Cohttp_lwt_unix.Client.get url in
+  let%lwt body = Cohttp_lwt_body.to_string body in
+  let json = Yojson.Safe.from_string body in
+  match expand_results_of_yojson json with
+  | `Error msg -> Lwt.fail_with msg
+  | `Ok r ->
+    Lwt.return r.results
