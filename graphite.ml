@@ -10,14 +10,22 @@ module RawMetric = struct
 end
 
 module Metric = struct
-  type datapoint = {
-    timestamp : int;
-    value : float option;
-  } [@@deriving show]
+  module Datapoint = struct
+    type t = {
+      timestamp : int;
+      value : float option;
+    } [@@deriving show]
+
+    let map ~timestamp ~value d =
+      { timestamp = timestamp d.timestamp;
+        value = value d.value }
+  end
+
+  open Datapoint
 
   type t = {
     target : string;
-    datapoints : datapoint list;
+    datapoints : Datapoint.t list;
   } [@@deriving show]
 
   let datapoint_of_raw_datapoint (value, timestamp) =
@@ -26,9 +34,13 @@ module Metric = struct
   let of_raw { RawMetric.target; RawMetric.datapoints } =
     { target;
       datapoints = List.map datapoint_of_raw_datapoint datapoints }
+
+  let map ~target ~datapoints m =
+    { target = target m.target;
+      datapoints = datapoints m.datapoints }
 end
 
-type datapoint = Metric.datapoint
+type nonrec datapoint = Metric.Datapoint.t
 and metric = Metric.t
 
 let get url =
